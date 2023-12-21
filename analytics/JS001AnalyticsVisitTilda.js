@@ -164,11 +164,6 @@ function AKhJS001WaitForObjects(timeout = 5000) {
  * Инициализирует скрипт, ожидая загрузку DOM и появления нужных объектов.
  */
 async function AKhJS001InitScript() {
-  if (!window.AKhJS001Control || !window.AKhJS001Control.enable) {
-    console.log('Скрипт отключен');
-    return;
-  }
-
   if (document.readyState !== 'complete') {
     await new Promise((resolve) => document.addEventListener('DOMContentLoaded', resolve));
   }
