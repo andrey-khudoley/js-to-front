@@ -14,23 +14,6 @@ window.AKhJS001Control = {
 */
 
 /**
- * Проверяет, существуют ли объекты конфигурации и выводит сообщения в случае их отсутствия.
- */
-function AKhJS001CheckConfig() {
-  if (typeof window.AKhJS001Auth === 'undefined') {
-    console.error('AKh - js001: Конфигурация AKhJS001Auth не определена.');
-    return false;
-  }
-
-  if (typeof window.AKhJS001Control === 'undefined') {
-    console.error('AKh - js001: Конфигурация AKhJS001Control не определена.');
-    return false;
-  }
-
-  return true;
-}
-
-/**
  * Выводит сообщение в консоль, если включен режим отладки.
  * @param {string} message Сообщение для логирования.
  * @param {boolean} isError Указывает, является ли сообщение ошибкой.
@@ -140,10 +123,43 @@ function AKhJS001ExtractUrlAndParams() {
 }
 
 /**
- * Инициализирует скрипт после загрузки документа.
+ * Ожидает указанное количество времени.
+ * @param {number} ms Время ожидания в миллисекундах.
+ * @returns {Promise<void>} Промис, который разрешится после указанного времени.
+ */
+function AKhJS001WaitFor(ms) {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(undefined), ms);
+  });
+}
+
+/**
+ * Асинхронно ожидает определения конфигурационных объектов.
+ * @returns {Promise<boolean>} Промис, который разрешится с true, если объекты найдены, иначе false.
+ */
+async function AKhJS001WaitForConfig() {
+  const maxWaitTime = 5000; // Максимальное время ожидания в миллисекундах
+  const checkInterval = 100; // Интервал проверки наличия объектов
+
+  let elapsedTime = 0;
+  while (elapsedTime < maxWaitTime) {
+    if (typeof window.AKhJS001Auth !== 'undefined' && typeof window.AKhJS001Control !== 'undefined') {
+      return true; // Конфигурационные объекты найдены
+    }
+    // eslint-disable-next-line no-await-in-loop
+    await AKhJS001WaitFor(checkInterval);
+    elapsedTime += checkInterval;
+  }
+  return false;
+}
+
+/**
+ * Инициализирует скрипт после загрузки документа,
+ * убедившись, что конфигурационные объекты доступны.
  */
 async function AKhJS001InitScript() {
-  if (!AKhJS001CheckConfig()) {
+  if (!await AKhJS001WaitForConfig()) {
+    console.error('AKh - js001: Конфигурационные объекты не были определены в течение 5 секунд.');
     return;
   }
 
@@ -152,23 +168,15 @@ async function AKhJS001InitScript() {
     return;
   }
 
-  const init = async () => {
-    AKhJS001Log('Скрипт инициализирован');
-    const uuid = AKhJS001GetOrCreateUUID();
-    const userIP = await AKhJS001FetchUserIP();
-    const { url, params } = AKhJS001ExtractUrlAndParams();
-    const data = {
-      uuid, userIP, url, params,
-    };
-
-    AKhJS001SendPostRequest(window.AKhJS001Auth.server, data);
+  AKhJS001Log('Скрипт инициализирован');
+  const uuid = AKhJS001GetOrCreateUUID();
+  const userIP = await AKhJS001FetchUserIP();
+  const { url, params } = AKhJS001ExtractUrlAndParams();
+  const data = {
+    uuid, userIP, url, params,
   };
 
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    await init();
-  } else {
-    document.addEventListener('DOMContentLoaded', init);
-  }
+  AKhJS001SendPostRequest(window.AKhJS001Auth.server, data);
 }
 
 AKhJS001InitScript();
