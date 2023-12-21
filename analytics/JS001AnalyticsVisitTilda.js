@@ -121,7 +121,7 @@ function AKhJS001ExtractUrlAndParams() {
 /**
  * Ожидает появления объектов на странице.
  * @param {number} timeout Максимальное время ожидания в мс.
- * @returns {Promise} Промис, разрешающийся при наличии объектов.
+ * @returns {Promise<void>} Промис, разрешающийся при наличии объектов.
  */
 function AKhJS001WaitForObjects(timeout = 5000) {
   return new Promise((resolve, reject) => {
@@ -129,7 +129,7 @@ function AKhJS001WaitForObjects(timeout = 5000) {
     const checkExist = setInterval(() => {
       if (window.AKhJS001Auth && window.AKhJS001Control) {
         clearInterval(checkExist);
-        resolve();
+        resolve(); // Просто разрешаем промис
       } else if (Date.now() - startTime > timeout) {
         clearInterval(checkExist);
         reject(new Error('Таймаут ожидания объектов'));
@@ -142,26 +142,31 @@ function AKhJS001WaitForObjects(timeout = 5000) {
  * Инициализирует скрипт.
  */
 async function AKhJS001InitScript() {
-  if (!AKhJS001CheckConfig()) {
-    return;
-  }
-
-  if (document.readyState !== 'complete') {
-    await new Promise((resolve) => {
-      document.addEventListener('DOMContentLoaded', () => resolve());
-    });
-  }
-
   try {
+    if (!AKhJS001CheckConfig()) {
+      throw new Error('Конфигурация не определена.');
+    }
+
+    if (document.readyState !== 'complete') {
+      await new Promise((resolve) => {
+        document.addEventListener('DOMContentLoaded', () => {
+          resolve();
+        });
+      });
+    }
+
     await AKhJS001WaitForObjects();
+
     AKhJS001Log('Скрипт инициализирован');
+
     const uuid = AKhJS001GetOrCreateUUID();
     const userIP = await AKhJS001FetchUserIP();
     const { url, params } = AKhJS001ExtractUrlAndParams();
     const data = {
       uuid, userIP, url, params,
     };
-    AKhJS001SendPostRequest(window.AKhJS001Auth.server, data);
+
+    await AKhJS001SendPostRequest(window.AKhJS001Auth.server, data);
   } catch (error) {
     AKhJS001Log(`Ошибка: ${error.message}`, true);
   }
