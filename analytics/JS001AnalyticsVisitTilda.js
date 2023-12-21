@@ -1,13 +1,13 @@
 /*
   Пример настроек:
 
-const AKhJS001Auth = {
+window.AKhJS001Auth = {
   server: 'https://core.khudoley.pro:22327/visit/tilda',
   authKey: 'key',
   authValue: 'value',
 };
 
-const AKhJS001Control = {
+window.AKhJS001Control = {
   enable: false,
   debug: true,
 };
@@ -19,7 +19,7 @@ const AKhJS001Control = {
  * @param {boolean} isError Указывает, является ли сообщение ошибкой.
  */
 function AKhJS001Log(message, isError = false) {
-  if (AKhJS001Control && AKhJS001Control.debug) {
+  if (window.AKhJS001Control && window.AKhJS001Control.debug) {
     const logFunction = isError ? console.error : console.log;
     logFunction(`AKh - js001: ${message}`);
   }
@@ -29,8 +29,8 @@ function AKhJS001Log(message, isError = false) {
  * Проверяет, существуют ли объекты конфигурации.
  */
 function AKhJS001CheckConfig() {
-  if (!AKhJS001Auth || !AKhJS001Control) {
-    AKhJS001Log('Конфигурация AKhJS001Auth или AKhJS001Control не определена.', true);
+  if (!window.AKhJS001Auth || !window.AKhJS001Control) {
+    AKhJS001Log('Конфигурация window.AKhJS001Auth или window.AKhJS001Control не определена.', true);
     return false;
   }
   return true;
@@ -94,7 +94,7 @@ async function AKhJS001SendPostRequest(url, data) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        [AKhJS001Auth.authKey]: AKhJS001Auth.authValue,
+        [window.AKhJS001Auth.authKey]: window.AKhJS001Auth.authValue,
       },
       body: JSON.stringify(data),
     });
@@ -161,7 +161,7 @@ async function AKhJS001InitScript() {
     const data = {
       uuid, userIP, url, params,
     };
-    AKhJS001SendPostRequest(AKhJS001Auth.server, data);
+    AKhJS001SendPostRequest(window.AKhJS001Auth.server, data);
   } catch (error) {
     AKhJS001Log(`Ошибка: ${error.message}`, true);
   }
