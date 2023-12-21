@@ -1,6 +1,5 @@
 /*
   Пример настроек:
-*/
 
 const AKhJS001Auth = {
   server: 'https://core.khudoley.pro:22327/visit/tilda',
@@ -12,6 +11,7 @@ const AKhJS001Control = {
   enable: false,
   debug: true,
 };
+*/
 
 /**
  * Выводит сообщение в консоль, если включен режим отладки.
