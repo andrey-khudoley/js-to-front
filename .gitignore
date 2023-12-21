@@ -1,8 +1,0 @@
-# Игнорирование каталога node_modules
-node_modules/
-
-# Игнорирование локальных настроек eslint
-.eslintrc.json
-
-package.json
-package-lock.json
