@@ -1,5 +1,6 @@
 /*
   Пример настроек:
+*/
 
 const AKhJS001Auth = {
   server: 'https://core.khudoley.pro:22327/visit/tilda',
@@ -11,24 +12,6 @@ const AKhJS001Control = {
   enable: false,
   debug: true,
 };
-*/
-
-/**
- * Проверяет, существуют ли объекты конфигурации и выводит сообщения в случае их отсутствия.
- */
-function AKhJS001CheckConfig() {
-  if (typeof AKhJS001Auth === 'undefined') {
-    console.error('AKh - js001: Конфигурация AKhJS001Auth не определена.');
-    return false;
-  }
-
-  if (typeof AKhJS001Control === 'undefined') {
-    console.error('AKh - js001: Конфигурация AKhJS001Control не определена.');
-    return false;
-  }
-
-  return true;
-}
 
 /**
  * Выводит сообщение в консоль, если включен режим отладки.
@@ -43,67 +26,70 @@ function AKhJS001Log(message, isError = false) {
 }
 
 /**
- * Получает из куки или генерирует UUID,
- * сохраняет UUID в куки, если он не существует.
+ * Проверяет, существуют ли объекты конфигурации.
+ */
+function AKhJS001CheckConfig() {
+  if (!AKhJS001Auth || !AKhJS001Control) {
+    AKhJS001Log('Конфигурация AKhJS001Auth или AKhJS001Control не определена.', true);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Генерирует шестнадцатеричное число заданной длины.
+ * @param {number} length Длина числа.
+ * @returns {string} Шестнадцатеричное число.
+ */
+function AKhJS001GenerateHex(length) {
+  return Array.from({ length }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+}
+
+/**
+ * Получает из куки или генерирует UUID.
  * @returns {string} UUID пользователя.
  */
 function AKhJS001GetOrCreateUUID() {
-  // Пытаемся найти существующий UUID в куки
-  const existingUUID = document.cookie.split('; ').find((row) => row.startsWith('akhUserUUID='));
+  const cookieName = 'akhUserUUID=';
+  const existingUUID = document.cookie.split('; ').find((row) => row.startsWith(cookieName));
   if (existingUUID) {
     const uuid = existingUUID.split('=')[1];
     AKhJS001Log(`Используется существующий UUID: ${uuid}`);
     return uuid;
   }
 
-  // Функция для генерации шестнадцатеричного числа заданной длины
-  const hex = (length) => Array.from({ length }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-
-  // Формируем UUID в соответствии со стандартом UUID v4
-  const newUUID = `${hex(8)}-${hex(4)}-4${hex(3)}-${[8, 9, 'a', 'b'][Math.floor(Math.random() * 4)]}${hex(3)}-${hex(12)}`;
-
-  // Сохраняем UUID в куки
-  document.cookie = `akhUserUUID=${newUUID}; max-age=${30 * 24 * 60 * 60}; path=/`;
+  const newUUID = `${AKhJS001GenerateHex(8)}-${AKhJS001GenerateHex(4)}-4${AKhJS001GenerateHex(3)}-${[8, 9, 'a', 'b'][Math.floor(Math.random() * 4)]}${AKhJS001GenerateHex(3)}-${AKhJS001GenerateHex(12)}`;
+  document.cookie = `${cookieName}${newUUID}; max-age=${30 * 24 * 60 * 60}; path=/`;
   AKhJS001Log(`Сгенерирован новый UUID: ${newUUID}`);
   return newUUID;
 }
 
 /**
- * Асинхронно получает IP-адрес пользователя через внешний API.
- * Возвращает `null` в случае неудачи или если время ожидания истекло.
- * @returns {Promise<string|null>} Промис. IP-адрес или `null`.
+ * Асинхронно получает IP-адрес пользователя.
+ * @returns {Promise<string|null>} IP-адрес или null.
  */
 async function AKhJS001FetchUserIP() {
   try {
     AKhJS001Log('Получение IP-адреса пользователя...');
-
-    const timeoutPromise = new Promise((resolve) => {
-      setTimeout(() => resolve(), 10000);
-    });
-
-    const fetchPromise = fetch('https://api.ipify.org?format=json')
-      .then((response) => response.json())
-      .then((data) => {
-        AKhJS001Log(`IP-адрес пользователя: ${data.ip}`);
-        return data.ip;
-      });
-
-    return await Promise.race([fetchPromise, timeoutPromise]) || null;
+    const response = await fetch('https://api.ipify.org?format=json');
+    if (!response.ok) throw new Error('Ошибка при получении IP');
+    const data = await response.json();
+    AKhJS001Log(`IP-адрес пользователя: ${data.ip}`);
+    return data.ip;
   } catch (error) {
-    AKhJS001Log('Ошибка при получении IP', true, error);
+    AKhJS001Log(`Ошибка при получении IP: ${error}`, true);
     return null;
   }
 }
 
 /**
- * Асинхронно отправляет POST-запрос на указанный сервер с данными пользователя.
+ * Асинхронно отправляет POST-запрос на сервер с данными пользователя.
  * @param {string} url Адрес сервера.
  * @param {Object} data Данные для отправки.
  */
 async function AKhJS001SendPostRequest(url, data) {
   try {
     AKhJS001Log(`Отправка POST-запроса на: ${url}`);
-    AKhJS001Log(`Данные запроса: ${JSON.stringify(data)}`);
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -112,15 +98,9 @@ async function AKhJS001SendPostRequest(url, data) {
       },
       body: JSON.stringify(data),
     });
-
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      const result = await response.json();
-      AKhJS001Log(`Ответ сервера: ${JSON.stringify(result)}`);
-    } else {
-      const textResponse = await response.text();
-      AKhJS001Log(`Ответ сервера (не JSON): ${textResponse}`);
-    }
+    if (!response.ok) throw new Error('Ошибка отправки POST-запроса');
+    const result = await response.json();
+    AKhJS001Log(`Ответ сервера: ${JSON.stringify(result)}`);
   } catch (error) {
     AKhJS001Log(`Ошибка при отправке POST-запроса: ${error}`, true);
   }
@@ -128,22 +108,20 @@ async function AKhJS001SendPostRequest(url, data) {
 
 /**
  * Извлекает URL и параметры текущей страницы.
- * @returns {{url: string, params: Object}} Объект, содержащий URL и параметры страницы.
+ * @returns {{url: string, params: Object}} URL и параметры.
  */
 function AKhJS001ExtractUrlAndParams() {
-  const currentUrl = window.location.origin + window.location.pathname;
+  const currentUrl = window.location.href;
   const urlParams = new URLSearchParams(window.location.search);
   const params = Object.fromEntries(urlParams.entries());
   AKhJS001Log(`Текущий URL и параметры: ${currentUrl}, ${JSON.stringify(params)}`);
-
   return { url: currentUrl, params };
 }
 
 /**
- * Ожидает появления объектов на странице в течение заданного времени.
- * @param {number} timeout Максимальное время ожидания в миллисекундах.
- * @returns {Promise} Промис, который разрешается при наличии объектов
- * или отклоняется при истечении времени ожидания.
+ * Ожидает появления объектов на странице.
+ * @param {number} timeout Максимальное время ожидания в мс.
+ * @returns {Promise} Промис, разрешающийся при наличии объектов.
  */
 function AKhJS001WaitForObjects(timeout = 5000) {
   return new Promise((resolve, reject) => {
@@ -161,16 +139,22 @@ function AKhJS001WaitForObjects(timeout = 5000) {
 }
 
 /**
- * Инициализирует скрипт, ожидая загрузку DOM и появления нужных объектов.
+ * Инициализирует скрипт.
  */
 async function AKhJS001InitScript() {
+  if (!AKhJS001CheckConfig()) {
+    return;
+  }
+
   if (document.readyState !== 'complete') {
-    await new Promise((resolve) => document.addEventListener('DOMContentLoaded', resolve));
+    await new Promise((resolve) => {
+      document.addEventListener('DOMContentLoaded', () => resolve());
+    });
   }
 
   try {
     await AKhJS001WaitForObjects();
-    console.log('Скрипт инициализирован');
+    AKhJS001Log('Скрипт инициализирован');
     const uuid = AKhJS001GetOrCreateUUID();
     const userIP = await AKhJS001FetchUserIP();
     const { url, params } = AKhJS001ExtractUrlAndParams();
@@ -179,7 +163,7 @@ async function AKhJS001InitScript() {
     };
     AKhJS001SendPostRequest(AKhJS001Auth.server, data);
   } catch (error) {
-    console.log(`Ошибка: ${error.message}`);
+    AKhJS001Log(`Ошибка: ${error.message}`, true);
   }
 }
 
