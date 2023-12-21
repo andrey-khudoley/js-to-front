@@ -140,29 +140,52 @@ function AKhJS001ExtractUrlAndParams() {
 }
 
 /**
- * Инициализирует скрипт после загрузки документа.
+ * Ожидает появления объектов на странице в течение заданного времени.
+ * @param {number} timeout Максимальное время ожидания в миллисекундах.
+ * @returns {Promise} Промис, который разрешается при наличии объектов
+ * или отклоняется при истечении времени ожидания.
+ */
+function AKhJS001WaitForObjects(timeout = 5000) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    const checkExist = setInterval(() => {
+      if (window.AKhJS001Auth && window.AKhJS001Control) {
+        clearInterval(checkExist);
+        resolve();
+      } else if (Date.now() - startTime > timeout) {
+        clearInterval(checkExist);
+        reject(new Error('Таймаут ожидания объектов'));
+      }
+    }, 100);
+  });
+}
+
+/**
+ * Инициализирует скрипт, ожидая загрузку DOM и появления нужных объектов.
  */
 async function AKhJS001InitScript() {
-  if (!AKhJS001CheckConfig()) {
+  if (!window.AKhJS001Control || !window.AKhJS001Control.enable) {
+    console.log('Скрипт отключен');
     return;
   }
 
-  if (!AKhJS001Control.enable) {
-    AKhJS001Log('Скрипт отключен');
-    return;
+  if (document.readyState !== 'complete') {
+    await new Promise((resolve) => document.addEventListener('DOMContentLoaded', resolve));
   }
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    AKhJS001Log('Скрипт инициализирован');
+  try {
+    await AKhJS001WaitForObjects();
+    console.log('Скрипт инициализирован');
     const uuid = AKhJS001GetOrCreateUUID();
     const userIP = await AKhJS001FetchUserIP();
     const { url, params } = AKhJS001ExtractUrlAndParams();
     const data = {
       uuid, userIP, url, params,
     };
-
     AKhJS001SendPostRequest(AKhJS001Auth.server, data);
-  });
+  } catch (error) {
+    console.log(`Ошибка: ${error.message}`);
+  }
 }
 
 AKhJS001InitScript();
