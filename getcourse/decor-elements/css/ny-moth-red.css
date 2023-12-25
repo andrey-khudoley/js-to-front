@@ -54,4 +54,4 @@
 .b-ball_bounce .b-ball__right.bounce2+.b-ball__i{transform:rotate(3deg)}
 .b-ball_bounce.bounce3>.b-ball__i{transform:rotate(1.5deg)}
 .b-ball_bounce .b-ball__right.bounce3+.b-ball__i{transform:rotate(-1.5deg)}
-.resp-screen.resp-full-window.full-window-size { z-index: 1000; }
+.resp-screen.resp-full-window.full-window-size { z-index: 999; }
