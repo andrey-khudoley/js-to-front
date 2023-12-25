@@ -1,5 +1,5 @@
 .logo-link img {margin-top: 20px;opacity: 0;}
-.ny_balls{position: absolute;top: 0px;left: 0px; width: 100%;overflow: hidden;}
+.ny_balls{position: absolute;top: 0px;left: 0px; width: 100%;overflow: hidden;z-index: 999;}
 .main-page-block .page-header {margin-top: 45px;}
 .b-head-decor{display:none}
 .b-page_newyear .b-head-decor{display:block;height:115px;width:100vw;overflow:hidden;background:url(https://fs.getcourse.ru/fileservice/file/download/a/2739/sc/246/h/4d7243afaf9396fda45b19087c135cdc.png) repeat-x 0 0}
@@ -54,3 +54,4 @@
 .b-ball_bounce .b-ball__right.bounce2+.b-ball__i{transform:rotate(3deg)}
 .b-ball_bounce.bounce3>.b-ball__i{transform:rotate(1.5deg)}
 .b-ball_bounce .b-ball__right.bounce3+.b-ball__i{transform:rotate(-1.5deg)}
+.resp-screen.resp-full-window.full-window-size { z-index: 1000; }
