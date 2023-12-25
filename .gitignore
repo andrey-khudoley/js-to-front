@@ -1,6 +1,3 @@
-# Игнорирование gitignore
-.gitignore
-
 # Игнорирование каталога node_modules
 node_modules/
 
