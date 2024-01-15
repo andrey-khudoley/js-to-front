@@ -51,10 +51,10 @@ function fillCustomMenuList(menuData) {
 }
 
 /**
- * Создает дополнительный элемент на странице в элементе с классом custom-actions.
+ * Создает дополнительный элемент на странице в элементе с классом page-filter.
  */
 function createCustomButton() {
-  const customActions = document.querySelector('.custom-actions');
+  const customActions = document.querySelector('.page-filter');
   if (!customActions) return;
 
   const additionalActions = document.createElement('div');
