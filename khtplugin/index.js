@@ -7,7 +7,7 @@ const khtModulesConfig = {
     'https://cdn.jsdelivr.net/gh/anleyn/js-to-front@f492cd2/khtplugin/pages/user/control/segment/update/id/module.min.js',
   ],
   '\\/teach\\/control\\/answers.*': [
-    'https://cdn.jsdelivr.net/gh/anleyn/js-to-front@d18d3ae/khtplugin/pages/teach/control/answers/module.min.js',
+    'https://cdn.jsdelivr.net/gh/anleyn/js-to-front@b486211/khtplugin/pages/teach/control/answers/module.min.js',
   ],
 };
 
