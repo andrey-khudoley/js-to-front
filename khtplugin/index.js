@@ -3,7 +3,7 @@
  */
 
 const khtModulesConfig = {
-  '/user/control/segment/update/id/[0-9]+/': [
+  '\\/user\\/control\\/segment\\/update\\/id\\/[0-9]+\\/': [
     'https://cdn.jsdelivr.net/gh/anleyn/js-to-front@b0d3d97/khtplugin/pages/user/control/segment/update/id/module.js',
   ],
 };
