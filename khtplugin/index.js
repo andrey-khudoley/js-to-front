@@ -4,7 +4,10 @@
 
 const khtModulesConfig = {
   '\\/user\\/control\\/segment\\/update\\/id\\/[0-9]+\\/*': [
-    'https://cdn.jsdelivr.net/gh/anleyn/js-to-front@f492cd2/khtplugin/pages/user/control/segment/update/id/module.js',
+    'https://cdn.jsdelivr.net/gh/anleyn/js-to-front@f492cd2/khtplugin/pages/user/control/segment/update/id/module.min.js',
+  ],
+  '\\/teach\\/control\\/answers.*': [
+    'https://cdn.jsdelivr.net/gh/anleyn/js-to-front@d18d3ae/khtplugin/pages/teach/control/answers/module.min.js',
   ],
 };
 

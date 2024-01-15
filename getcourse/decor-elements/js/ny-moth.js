@@ -1,3 +1,6 @@
+/**
+ * Создает и добавляет новогоднюю мотню на страницу.
+ */
 $(document).ready(() => {
   const elelHtmlBalls = `<div class="ny_balls"><div class="b-page_newyear">
     <div class="b-page__content">
